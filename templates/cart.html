@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Cart - Pawfect Store</title>
+  <!-- Privacy-friendly analytics by Plausible -->
+<script async src="https://plausible.io/js/pa-UemF0utZ1o43xtyqZNicS.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fff3ef;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar {
+      background: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+      color: #ff6f61;
+    }
+
+    .cart-count {
+      background: #ff6f61;
+      color: white;
+      border-radius: 50%;
+      padding: 2px 6px;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    h2 {
+      color: #ff6f61;
+      margin-bottom: 20px;
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 15px;
+    }
+
+    .cart-item img {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .cart-item .details {
+      flex: 1;
+      margin-left: 15px;
+    }
+
+    .btn-remove {
+      background: #e05a4f;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-remove:hover {
+      background: #c94c40;
+    }
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quantity-controls button {
+      background: #ff6f61;
+      color: white;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .quantity-controls button:hover {
+      background: #e05a4f;
+    }
+
+    .total {
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+    .btn-pay {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 12px 20px;
+      background: #ff6f61;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .btn-pay:hover {
+      background: #e05a4f;
+    }
+
+    .btn-back {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #ff6f61;
+      margin-right: 15px;
+    }
+
+    .btn-back:hover {
+      color: #e05a4f;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div style="display: flex; align-items: center;">
+      <button
+        class="btn-back"
+        onclick="window.location.href='{{ url_for('user_dashboard') }}'"
+      >
+        <i class="fa fa-arrow-left"></i>
+      </button>
+      <div class="logo">🐾 Pawfect Store</div>
+    </div>
+    <div>
+      <a href="{{ url_for('user_dashboard') }}">Home</a> |
+      <a href="{{ url_for('cart') }}">
+        <i class="fa fa-shopping-cart"></i> Cart
+      </a>
+    </div>
+  </header>
+
+  <!-- Cart Section -->
+  <div class="container">
+    <h2>Your Cart</h2>
+    <div id="cartItems"></div>
+    <div class="total" id="totalPrice">Total: ₹0</div>
+    <button class="btn-pay" onclick="makePayment()">Proceed to Payment</button>
+  </div>
+
+  <script>
+    // 🛒 Load Cart Items
+    function loadCart() {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      let cartItemsDiv = document.getElementById("cartItems");
+      let total = 0;
+      cartItemsDiv.innerHTML = "";
+
+      if (cart.length === 0) {
+        cartItemsDiv.innerHTML = "<p>Your cart is empty 🛒</p>";
+        document.getElementById("totalPrice").innerText = "Total: ₹0";
+        return;
+      }
+
+      cart.forEach((item, index) => {
+        let price = parseFloat(item.price) || 0;
+        if (!item.quantity) item.quantity = 1;
+        let itemTotal = price * item.quantity;
+        total += itemTotal;
+
+        const imgPath =
+          item.img && item.img.trim() !== ""
+            ? `/static/images/${item.img}`
+            : "/static/images/default-product.png";
+
+        cartItemsDiv.innerHTML += `
+          <div class="cart-item">
+            <img src="${imgPath}" alt="${item.product_name || item.name}">
+            <div class="details">
+              <p><b>${item.product_name || item.name}</b></p>
+              <p>₹${price} × ${item.quantity} = ₹${itemTotal}</p>
+              <div class="quantity-controls">
+                <button onclick="updateQuantity(${index}, -1)">−</button>
+                <span>${item.quantity}</span>
+                <button onclick="updateQuantity(${index}, 1)">+</button>
+              </div>
+            </div>
+            <button class="btn-remove" onclick="removeFromCart(${index})">
+              Remove
+            </button>
+          </div>
+        `;
+      });
+
+      localStorage.setItem("cartTotal", total);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      document.getElementById("totalPrice").innerText = "Total: ₹" + total;
+    }
+
+    // ➕➖ Update Quantity
+    function updateQuantity(index, change) {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      if (cart[index]) {
+        cart[index].quantity = (cart[index].quantity || 1) + change;
+        if (cart[index].quantity < 1) cart[index].quantity = 1;
+        localStorage.setItem("cart", JSON.stringify(cart));
+        loadCart();
+      }
+    }
+
+    // ❌ Remove Item
+    function removeFromCart(index) {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      loadCart();
+    }
+
+    // 💳 Razorpay Payment Integration
+    async function makePayment() {
+      let total = localStorage.getItem("cartTotal") || 0;
+      if (total == 0) {
+        alert("🛒 Your cart is empty!");
+        return;
+      }
+
+      try {
+        // 1️⃣ Create Razorpay Order on Flask backend
+        const res = await fetch("/create_order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: total }),
+        });
+
+        const order = await res.json();
+        if (!order || !order.id) {
+          alert("Failed to create payment order!");
+          return;
+        }
+
+        // 2️⃣ Razorpay Checkout Options
+        const options = {
+          key: "{{ razorpay_key_id }}",
+          amount: order.amount,
+          currency: order.currency,
+          name: "Pawfect Store",
+          description: "Purchase from Pawfect Store",
+          order_id: order.id,
+
+          // ✅ UPDATED HANDLER FUNCTION
+          handler: async function (response) {
+            const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+            // ✅ Convert to send product_name to backend
+            const formattedCart = cart.map(item => ({
+              product_id: item._id || item.product_id,
+              product_name: item.product_name || item.name,
+              price: item.price,
+              quantity: item.quantity
+            }));
+
+            const verifyRes = await fetch("/verify_payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                cart: formattedCart
+              }),
+            });
+
+            const verifyData = await verifyRes.json();
+
+            if (verifyData.verified) {
+              alert("✅ Payment successful!");
+              localStorage.removeItem("cart");
+              window.location.href = "{{ url_for('user_dashboard') }}";
+            } else {
+              alert("❌ Payment verification failed!");
+            }
+          },
+
+          prefill: {
+            name: "Test User",
+            email: "test@example.com",
+            contact: "9999999999",
+          },
+          theme: { color: "#ff6f61" },
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+      } catch (err) {
+        console.error(err);
+        alert("Error processing payment!");
+      }
+    }
+
+    // Initialize
+    loadCart();
+  </script>
+</body>
+</html>

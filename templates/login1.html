@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Selection - Pawfectt</title>
+  <!-- Privacy-friendly analytics by Plausible -->
+<script async src="https://plausible.io/js/pa-UemF0utZ1o43xtyqZNicS.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #ffecd2, #fcb69f);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Center Box */
+    .login-choice-container {
+      background: #fff;
+      padding: 40px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 6px 25px rgba(0,0,0,0.2);
+      width: 400px;
+    }
+
+    .login-choice-container h1 {
+      font-size: 26px;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    .btn {
+      display: block;
+      background: #ff6f61;
+      color: #fff;
+      padding: 14px;
+      margin: 15px 0;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: 0.3s;
+      text-decoration: none; /* for <a> */
+    }
+
+    .btn:hover {
+      background: #e05a4f;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-choice-container">
+    <h1>🐾 Welcome to Pawfectt</h1>
+    <a href="{{ url_for('login_user') }}" class="btn">User Login</a>
+    <a href="{{ url_for('login_admin') }}" class="btn">Admin Login</a>
+  </div>
+
+</body>
+</html>

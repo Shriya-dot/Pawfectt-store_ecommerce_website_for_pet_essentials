@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Login - Pet Store</title>
+  <!-- Privacy-friendly analytics by Plausible -->
+<script async src="https://plausible.io/js/pa-UemF0utZ1o43xtyqZNicS.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #ffecd2, #fcb69f);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Top Navbar */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      background: #ff6f61;
+      color: #fff;
+    }
+
+    .top-nav .logo {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .search-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      margin: 0 20px;
+    }
+
+    .search-container input {
+      padding: 8px;
+      width: 60%;
+      border: none;
+      border-radius: 5px 0 0 5px;
+      outline: none;
+    }
+
+    .search-container button {
+      padding: 8px 12px;
+      border: none;
+      background: #fff;
+      border-radius: 0 5px 5px 0;
+      cursor: pointer;
+    }
+
+    .nav-icons a {
+      margin-left: 20px;
+      text-decoration: none;
+      color: #fff;
+      font-size: 14px;
+    }
+
+    .nav-icons .badge {
+      background: #fff;
+      color: #ff6f61;
+      padding: 2px 6px;
+      border-radius: 50%;
+      font-size: 12px;
+      margin-left: 5px;
+    }
+
+    /* Category Navbar */
+    .category-nav {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 10px;
+      background: #ffe5e0;
+    }
+
+    .category-nav a {
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .category-nav .tag {
+      background: #ff6f61;
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 12px;
+      margin-left: 5px;
+    }
+
+
+    /* Page Title */
+    .page-title {
+      text-align: center;
+      font-size: 28px;
+      margin: 20px 0;
+      color: #333;
+    }
+
+    /* Login Box */
+    .login-box {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      padding: 30px;
+    }
+
+    .login-section, .register-section {
+      background: #fff;
+      padding: 30px;
+      width: 350px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .login-section h2, .register-section h2 {
+      margin-bottom: 15px;
+      font-size: 20px;
+      color: #444;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #ff6f61;
+    }
+
+    .btn {
+      background: #ff6f61;
+      color: #fff;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .btn:hover {
+      background: #e05a4f;
+    }
+
+    .register-section p {
+      margin-bottom: 15px;
+      color: #555;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+
+
+
+
+
+  <!-- Page Heading -->
+  <h1 class="page-title">🐾 PAWFECTT LOGIN</h1>
+
+  <!-- Login & Register -->
+  <main class="login-box">
+    <!-- Returning User -->
+    <div class="login-section">
+      <h2>Returning Customer</h2>
+      <form action="{{ url_for('login_user') }}" method="post">
+        <label>Email <span>*</span></label>
+        <input type="text" name="email" required placeholder="Enter your email">
+        <label>Password <span>*</span></label>
+        <input type="password" name="password" required placeholder="Enter your password">
+
+        <button type="submit" class="btn">Login</button>
+      </form>
+    </div>
+
+    <!-- New User -->
+    <div class="register-section">
+      <h2>New Customer</h2>
+      <p>Create an account with us for faster checkout, order tracking and more.</p>
+      <a href="{{ url_for('register_user') }}" class="btn">Create An Pawfectt Account</a>
+    </div>
+  </main>
+
+</body>
+</html>

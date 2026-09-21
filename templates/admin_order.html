@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders - Admin Dashboard</title>
+ <!-- Privacy-friendly analytics by Plausible -->
+<script async src="https://plausible.io/js/pa-UemF0utZ1o43xtyqZNicS.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+    .navbar { background: #333; color: #fff; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .navbar a { color: #fff; text-decoration: none; margin-left: 15px; }
+    .navbar a:hover { color: #ff6f61; }
+    h1 { text-align: center; margin: 20px 0; color: #333; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    .info-box { background: #e3f2fd; border-left: 4px solid #2196F3; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    .info-box p { margin: 0; color: #1976D2; font-weight: 500; }
+    table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 5px; overflow: hidden; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background: #333; color: #fff; font-weight: bold; }
+    tr:nth-child(even) { background: #f9f9f9; }
+    tr:hover { background: #f0f0f0; }
+    .order-items { font-size: 14px; color: #555; max-width: 300px; word-wrap: break-word; }
+    .status-completed { color: #4caf50; font-weight: bold; }
+    .status-pending { color: #ff9800; font-weight: bold; }
+    .amount { color: #2196F3; font-weight: bold; font-size: 16px; }
+    .no-orders { text-align: center; padding: 40px; color: #999; font-size: 18px; }
+    .refresh-btn { background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+    .refresh-btn:hover { background: #45a049; }
+  </style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="logo" style="font-size: 20px; font-weight: bold;">🐾 Pawfectt Admin - Orders</div>
+  <div class="nav-links">
+    <a href="{{ url_for('admin_dashboard') }}">Products</a>
+    <a href="{{ url_for('admin_order') }}">Orders</a>
+    <a href="{{ url_for('user_dashboard') }}">Home</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </div>
+</header>
+
+<h1>📋 Customer Orders</h1>
+
+<div class="container">
+  <div class="info-box">
+    <p><i class="fas fa-info-circle"></i> Total Orders: <span id="orderCount">0</span> | Refresh page to see latest orders</p>
+  </div>
+
+  <button class="refresh-btn" onclick="location.reload()">
+    <i class="fas fa-sync-alt"></i> Refresh Orders
+  </button>
+
+  <table id="ordersTable">
+    <thead>
+      <tr>
+        <th>Order Date</th>
+        <th>Customer Name</th>
+        <th>Customer Email</th>
+        <th>Items Purchased</th>
+        <th>Total Amount</th>
+        <th>Payment Method</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="ordersTableBody">
+      <!-- Orders will be dynamically loaded here -->
+    </tbody>
+  </table>
+</div>
+
+<script>
+async function loadOrders() {
+  try {
+    const res = await fetch('/admin/get_orders');
+    const orders = await res.json();
+    const tableBody = document.getElementById('ordersTableBody');
+    const orderCount = document.getElementById('orderCount');
+    
+    tableBody.innerHTML = '';
+
+    if (!orders || orders.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="7" class="no-orders">📭 No orders found</td></tr>';
+      orderCount.textContent = '0';
+      return;
+    }
+
+    orderCount.textContent = orders.length;
+
+    orders.forEach(order => {
+      const row = document.createElement('tr');
+      
+      // ✅ Properly formatted items list using template literals
+      let itemsList = '';
+      if (order.items && Array.isArray(order.items)) {
+        itemsList = order.items.map(item => {
+          const name = item.product_name || item.name || "Unnamed Product";
+          return `🐾 ${name} (Qty: ${item.quantity || 1}, ₹${item.price || 0})`;
+        }).join('<br>');
+      } else if (order.product_name) {
+        itemsList = `🐾 ${order.product_name} (Qty: ${order.quantity || 1}, ₹${order.price || 0})`;
+      } else {
+        itemsList = "No product details available";
+      }
+
+
+      const totalAmount = order.total_amount || order.total_price || 0;
+      const paymentMethod = order.payment_method || 'Razorpay';
+      const status = order.status || 'Completed';
+
+      row.innerHTML = `
+        <td>${order.order_date || 'N/A'}</td>
+        <td><strong>${order.user_name || 'N/A'}</strong></td>
+        <td>${order.user_email || 'N/A'}</td>
+        <td class="order-items">${itemsList}</td>
+        <td class="amount">₹${Number(totalAmount).toFixed(2)}</td>
+        <td>${paymentMethod}</td>
+        <td class="status-${status.toLowerCase()}">${status}</td>
+      `;
+      tableBody.appendChild(row);
+    });
+  } catch (error) {
+    console.error('Error loading orders:', error);
+    alert('⚠️ Failed to load orders. Check console for details.');
+  }
+}
+
+// Load orders when page loads
+document.addEventListener('DOMContentLoaded', loadOrders);
+setInterval(loadOrders, 5000);
+</script>
+
+</body>
+</html>

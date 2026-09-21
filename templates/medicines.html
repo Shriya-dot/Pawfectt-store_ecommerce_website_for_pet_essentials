@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medicines - Pawfectt Store</title>
+  <!-- Privacy-friendly analytics by Plausible -->
+<script async src="https://plausible.io/js/pa-UemF0utZ1o43xtyqZNicS.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fffaf6; }
+    .navbar { background: #333; color: #fff; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .navbar a { color: #fff; text-decoration: none; margin-left: 15px; }
+    .back-btn { display: inline-block; margin: 10px; font-size: 18px; text-decoration: none; color: #333; }
+    h1 { text-align: center; margin: 20px 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap: 20px; padding: 0 20px; }
+    .card { border: 1px solid #ccc; border-radius: 10px; padding: 10px; text-align: center; transition: 0.3s; position: relative; background: #fff; }
+    .card img { width: 100%; height: 150px; object-fit: cover; border-radius: 10px; }
+    .card p { margin: 10px 0; font-weight: bold; }
+    .card span { color: green; font-weight: bold; }
+    .card button { margin-top: 10px; padding: 5px 10px; cursor: pointer; border: none; background: #28a745; color: #fff; border-radius: 5px; }
+    .card button:disabled { background: #ccc; cursor: not-allowed; }
+    .popup { position: absolute; top: 10px; right: 10px; background: #28a745; color: #fff; padding: 5px 10px; border-radius: 5px; opacity: 0; transition: 0.3s; }
+    .popup.show { opacity: 1; }
+    footer { text-align: center; margin: 20px 0; color: #555; }
+  </style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="logo">🐾 Pawfectt Store</div>
+  <div class="nav-links">
+    <a href="{{ url_for('user_dashboard') }}">Home</a>
+    <a href="{{ url_for('cart') }}"><i class="fa fa-shopping-cart"></i> Cart</a>
+  </div>
+</header>
+
+<a href="{{ url_for('user_dashboard') }}" class="back-btn"><i class="fa fa-arrow-left"></i> Back</a>
+<h1>Medicines for Pets</h1>
+<div class="grid" id="productGrid">Loading...</div>
+
+<footer>
+  <p>© 2025 Pawfectt Store</p>
+</footer>
+
+<script>
+async function loadProducts() {
+  try {
+    const res = await fetch('/get_products?category=medicines');
+    const products = await res.json();
+    const grid = document.getElementById('productGrid');
+    grid.innerHTML = '';
+
+    if (!products.length) {
+      grid.innerHTML = '<p>No products available.</p>';
+      return;
+    }
+
+    products.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const imgPath = p.img ? `/static/images/${p.img}` : '/static/images/default-product.png';
+      card.innerHTML = `
+        <img src="${imgPath}" alt="${p.name}" onerror="this.src='/static/images/default-product.png'">
+        <p>${p.name}</p>
+        <span>₹${p.price}</span>
+        <button class="add-cart" ${p.stock <= 0 ? 'disabled' : ''}>
+          ${p.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
+        </button>
+      `;
+      grid.appendChild(card);
+
+      const btn = card.querySelector('.add-cart');
+      if (p.stock > 0) {
+        btn.addEventListener('click', () => {
+          let cart = JSON.parse(localStorage.getItem("cart")) || [];
+          cart.push({ id: p._id, name: p.name, price: p.price, img: p.img });
+          localStorage.setItem("cart", JSON.stringify(cart));
+
+          const popup = document.createElement('div');
+          popup.className = 'popup';
+          popup.textContent = '✅ Added to Cart!';
+          card.appendChild(popup);
+          setTimeout(() => popup.classList.add('show'), 10);
+          setTimeout(() => popup.remove(), 1500);
+        });
+      }
+    });
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById('productGrid').innerHTML = '<p>Failed to load products.</p>';
+  }
+}
+
+loadProducts();
+setInterval(loadProducts, 5000);
+</script>
+</body>
+</html>
